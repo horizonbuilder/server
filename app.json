@@ -1,0 +1,35 @@
+{
+  "name": "server",
+  "scripts": {
+    "postdeploy": "knex migrate:latest --env development --knexfile src/knexfile.js && heroku config:set HOST_NAME=${HEROKU_APP_NAME}.herokuapp.com --app ${HEROKU_APP_NAME}"
+  },
+  "env": {
+    "HEROKU_APP_NAME": {
+        "required": true
+    },
+    "TOKEN_SECRET": {
+      "required": true,
+      "generator": "secret"
+    },
+    "SECRET_KEY": {
+      "required": true,
+      "generator": "secret"
+    },
+    "AWS_ACCESS_KEY_ID": { "required": true },
+    "AWS_SECRET_ACCESS_KEY": { "required": true },
+    "AWS_S3_BUCKET_NAME": { "required": true }
+  },
+  "formation": {
+  },
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-cli"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
