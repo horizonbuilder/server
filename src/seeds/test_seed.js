@@ -29,7 +29,10 @@ exports.seed = function(knex, Promise) {
       ]);
     })
     .then(() => {
-      return knex('jobs').insert([{ name: 'job 1', user_id: 1 }, { name: 'job 2', user_id: 1 }]);
+      return knex('jobs').insert([
+        { name: 'job 1', user_id: 1, status: 'in-progress' },
+        { name: 'job 2', user_id: 1, status: 'in-progress' }
+      ]);
     })
     .then(() => {
       return knex('estimates').insert([{ job_id: 1 }, { job_id: 2 }]);
@@ -41,11 +44,22 @@ exports.seed = function(knex, Promise) {
       return knex('trades').insert([{ estimate_id: 1, name: 'Roofing' }]);
     })
     .then(() => {
-      return knex('services').insert([{ trade_id: 1, order_id: 1 }, { trade_id: 1 }]);
+      return knex('services').insert([
+        { name: 'Remove old shingles', trade_id: 1, order_id: 1 },
+        { name: 'Install new shingles', trade_id: 1 }
+      ]);
     })
     .then(() => {
       return knex('services_materials').insert([
-        { service_id: 1, name: 'shingles', quantity: 100 }
+        {
+          service_id: 1,
+          name: 'shingles',
+          quantity: 100,
+          unit: 'pieces',
+          cost_per_unit: 10,
+          supplier_cost: 5,
+          profit: 50
+        }
       ]);
     })
     .then(() => {

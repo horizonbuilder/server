@@ -250,7 +250,7 @@ router.put(
  *  /jobs/{job_id}/materials/{material_id}:
  *  delete:
  *    tags:
- *    - services
+ *    - materials
  *    summary: delete a material, the user must own this job
  *    security:
  *      - Bearer: []

@@ -56,7 +56,7 @@ router.get(
 
     try {
       let services = await knex('services')
-        .select('*')
+        .select('services.id', 'services.name', 'trade_id', 'order_id')
         .join('trades', 'trades.id', '=', 'services.trade_id')
         .where('trades.estimate_id', estimate_id);
 
@@ -133,7 +133,7 @@ router.post('/:job_id/services/', authHelpers.ensureAuthenticated, async (req, r
 
 /**
  * @swagger
- *  /jobs/{job_id}/services:
+ *  /jobs/{job_id}/services/{service_id}:
  *  put:
  *    tags:
  *    - services
