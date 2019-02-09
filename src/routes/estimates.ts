@@ -108,7 +108,7 @@ router.get(
       let labor = await knex('services_labor')
         .join('services', 'services.id', '=', 'services_labor.service_id')
         .join('trades', 'trades.id', '=', 'services.trade_id')
-        .select('cost')
+        .select('hours', 'cost_per_hour')
         .where({ estimate_id });
 
       let total = 0;
@@ -116,7 +116,7 @@ router.get(
         total += s.quantity * s.cost_per_unit;
       });
       labor.forEach(l => {
-        total += l.cost;
+        total += l.hours * l.cost_per_hour;
       });
 
       res.status(200).json(total);
