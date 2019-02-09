@@ -23,6 +23,7 @@ import orders from './routes/orders';
 import estimates from './routes/estimates';
 import services from './routes/services';
 import materials from './routes/servicesMaterials';
+import labor from './routes/servicesLabor';
 import trades from './routes/trades';
 
 class App {
@@ -78,6 +79,7 @@ class App {
     this.express.use('/jobs', estimates);
     this.express.use('/jobs', services);
     this.express.use('/jobs', materials);
+    this.express.use('/jobs', labor);
     this.express.use('/jobs', trades);
 
     this.express.use('/upload', upload);
