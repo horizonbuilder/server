@@ -63,6 +63,8 @@ exports.seed = function(knex, Promise) {
       ]);
     })
     .then(() => {
-      return knex('services_labor').insert([{ service_id: 1, description: 'install shingles' }]);
+      return knex('services_labor').insert([
+        { service_id: 1, description: 'install shingles', hours: 40, cost_per_hour: 100 }
+      ]);
     });
 };
