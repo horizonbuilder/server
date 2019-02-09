@@ -64,6 +64,71 @@ router.get('/:job_id/estimates', authHelpers.ensureAuthenticated, async (req, re
 
 /**
  * @swagger
+ *  /jobs/{job_id}/estimates/{estimate_id}/total_cost:
+ *  get:
+ *    tags:
+ *    - estimates
+ *    summary: gets the total cost of all estimates for an estimate, the user must own this job
+ *    security:
+ *      - Bearer: []
+ *    produces:
+ *    - application/json
+ *    parameters:
+ *      - name: job_id
+ *        in: path
+ *        description: The id of the job
+ *        required: true
+ *        type: integer
+ *        example: 1
+ *      - name: estimate_id
+ *        in: path
+ *        description: The id of the estimate
+ *        required: true
+ *        type: integer
+ *        example: 1
+ *    responses:
+ *      200:
+ *        description: array of estimates
+ *        schema:
+ *          $ref: '#/definitions/Estimate'
+ */
+router.get(
+  '/:job_id/estimates/:estimate_id/total_cost',
+  authHelpers.ensureAuthenticated,
+  async (req, res) => {
+    let job_id = req.params.job_id;
+    let estimate_id = req.params.estimate_id;
+
+    try {
+      let services = await knex('services_materials')
+        .join('services', 'services.id', '=', 'services_materials.service_id')
+        .join('trades', 'trades.id', '=', 'services.trade_id')
+        .select('quantity', 'cost_per_unit')
+        .where({ estimate_id });
+      let labor = await knex('services_labor')
+        .join('services', 'services.id', '=', 'services_labor.service_id')
+        .join('trades', 'trades.id', '=', 'services.trade_id')
+        .select('cost')
+        .where({ estimate_id });
+
+      let total = 0;
+      services.forEach(s => {
+        total += s.quantity * s.cost_per_unit;
+      });
+      labor.forEach(l => {
+        total += l.cost;
+      });
+
+      res.status(200).json(total);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err.message);
+    }
+  }
+);
+
+/**
+ * @swagger
  *  /jobs/{job_id}/estimates/{estimate_id}:
  *  get:
  *    tags:

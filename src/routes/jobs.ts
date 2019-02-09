@@ -106,7 +106,8 @@ router.get('/:status(\\D+)', authHelpers.ensureAuthenticated, (req: any, res) =>
   let user_id = req.user.id;
 
   knex('jobs')
-    .select('*')
+    .join('clients', 'jobs.client_id', '=', 'clients.id')
+    .select('jobs.*', 'clients.name as client_name')
     .where({ user_id, status })
     .then(jobs => {
       if (jobs.length) res.status(200).json(jobs);
@@ -122,7 +123,8 @@ let getjobs = async (res, user_id: number, job_id?: number) => {
 
   try {
     let jobs = await knex('jobs')
-      .select('id', 'name', 'status', 'created_at')
+      .leftJoin('clients', 'jobs.client_id', '=', 'clients.id')
+      .select('jobs.id', 'jobs.name', 'status', 'created_at', 'clients.name as client_name')
       .where(where);
 
     if (jobs.length) res.status(200).json(job_id ? jobs[0] : jobs);
@@ -169,7 +171,7 @@ router.post('/', authHelpers.ensureAuthenticated, async (req: any, res) => {
   let user_id = req.user.id;
   let values: any = {};
   try {
-    values = routeHelpers.parseBodyRequiredValues(req.body, ['name', 'client_name']);
+    values = routeHelpers.parseBodyRequiredValues(req.body, ['name']);
   } catch (err) {
     res.status(400).json({ error: err, message: err.message });
   }

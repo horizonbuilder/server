@@ -110,26 +110,30 @@ router.get(
  *        schema:
  *          $ref: '#/definitions/Service'
  */
-router.post('/:job_id/services/', authHelpers.ensureAuthenticated, async (req, res) => {
-  let job_id = req.params.job_id;
-  let values: any = routeHelpers.filterBody(req.body, ['name', 'trade_id', 'order_id']);
+router.post(
+  '/:job_id/estimates/:estimates_id/services/',
+  authHelpers.ensureAuthenticated,
+  async (req, res) => {
+    let job_id = req.params.job_id;
+    let values: any = routeHelpers.filterBody(req.body, ['name', 'trade_id', 'order_id']);
 
-  let job = await knex('jobs')
-    .where({ id: job_id })
-    .first();
+    let job = await knex('jobs')
+      .where({ id: job_id })
+      .first();
 
-  if (job) {
-    try {
-      let service = await knex('services').insert(values);
-      res.status(200).json(service);
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json(err.message);
+    if (job) {
+      try {
+        let service = await knex('services').insert(values, '*');
+        res.status(200).json(service[0]);
+      } catch (err) {
+        console.log(err);
+        return res.status(500).json(err.message);
+      }
+    } else {
+      res.status(400).json({ error: `job ${job_id} does not exist` });
     }
-  } else {
-    res.status(400).json({ error: `job ${job_id} does not exist` });
   }
-});
+);
 
 /**
  * @swagger

@@ -7,31 +7,25 @@ const router = express.Router();
 /**
  * @swagger
  * definitions:
- *   Material:
+ *   Labor:
  *     properties:
  *       id:
  *         type: integer
- *       name:
+ *       description:
  *         type: string
- *       quantity:
+ *       hours:
  *         type: integer
- *       unit:
- *         type: string
- *       cost_per_unit:
- *         type: float
- *       supplier_cost:
- *         type: float
- *       profit:
+ *       cost_per_hour:
  *         type: float
  */
 
 /**
  * @swagger
- *  /jobs/{job_id}/services/{service_id}/materials:
+ *  /jobs/{job_id}/services/{service_id}/labor:
  *  get:
  *    tags:
- *    - materials
- *    summary: gets a list of all materials for a service, the user must own this job
+ *    - labor
+ *    summary: gets a list of all labor for a service, the user must own this job
  *    security:
  *      - Bearer: []
  *    produces:
@@ -51,12 +45,12 @@ const router = express.Router();
  *        example: 1
  *    responses:
  *      200:
- *        description: array of materials
+ *        description: array of labor
  *        schema:
- *          $ref: '#/definitions/Service'
+ *          $ref: '#/definitions/Labor'
  */
 router.get(
-  '/:job_id/services/:service_id/materials',
+  '/:job_id/services/:service_id/labor',
   authHelpers.ensureAuthenticated,
   routeHelpers.checkUserOwnsJob,
   async (req, res) => {
@@ -64,11 +58,11 @@ router.get(
     let service_id = req.params.service_id;
 
     try {
-      let materials = await knex('services_materials')
+      let labor = await knex('services_labor')
         .where({ service_id })
         .select('*');
 
-      res.status(200).json(materials);
+      res.status(200).json(labor);
     } catch (err) {
       console.log(err);
       res.status(500).json(err.message);
@@ -78,11 +72,11 @@ router.get(
 
 /**
  * @swagger
- *  /jobs/{job_id}/services/{service_id}/materials:
+ *  /jobs/{job_id}/services/{service_id}/labor:
  *  post:
  *    tags:
- *    - materials
- *    summary: add a material to a service, the user must own this job
+ *    - labor
+ *    summary: add a labor to a service, the user must own this job
  *    security:
  *      - Bearer: []
  *    produces:
@@ -102,51 +96,38 @@ router.get(
  *        required: true
  *        type: integer
  *        example: 1
- *      - name: material
+ *      - name: labor
  *        in: body
  *        required: true
  *        schema:
  *         type: object
  *         properties:
- *           name:
- *             example: material name
- *           quantity:
- *             example: 100
- *           unit:
- *             example: units
- *           cost_per_unit:
+ *           description:
+ *             example: labor name
+ *           hours:
  *             example: 10
- *           supplier_cost:
- *             example: 5
- *           profit:
- *             example: 50
+ *           cost_per_hour:
+ *             example: 100
  *    responses:
  *      200:
  *        description: successful operation
  *        schema:
- *          $ref: '#/definitions/Material'
+ *          $ref: '#/definitions/Labor'
  */
 router.post(
-  '/:job_id/services/:service_id/materials',
+  '/:job_id/services/:service_id/labor',
   authHelpers.ensureAuthenticated,
   routeHelpers.checkUserOwnsJob,
   async (req, res) => {
     let job_id = req.params.job_id;
     let service_id = req.params.service_id;
 
-    let values: any = routeHelpers.filterBody(req.body, [
-      'name',
-      'quantity',
-      'unit',
-      'cost_per_unit',
-      'supplier_cost',
-      'profit'
-    ]);
+    let values: any = routeHelpers.filterBody(req.body, ['description', 'hours', 'cost_per_hour']);
 
     try {
-      let material = await knex('services_materials').insert({ ...values, service_id }, '*');
+      let labor = await knex('services_labor').insert({ ...values, service_id }, '*');
 
-      res.status(200).json(material[0]);
+      res.status(200).json(labor[0]);
     } catch (err) {
       console.log(err);
       res.status(500).json(err.message);
@@ -156,13 +137,13 @@ router.post(
 
 /**
  * @swagger
- *  /jobs/{job_id}/materials/{material_id}:
+ *  /jobs/{job_id}/labor/{labor_id}:
  *   put:
  *     tags:
- *     - materials
+ *     - labor
  *     security:
  *       - Bearer: []
- *     summary: Updates a material, the user must own this job
+ *     summary: Updates a labor, the user must own this job
  *     produces:
  *     - application/json
  *     consumes:
@@ -174,70 +155,57 @@ router.post(
  *         required: true
  *         type: integer
  *         example: 1
- *       - name: material_id
- *         description: The id of the material
+ *       - name: labor_id
+ *         description: The id of the labor
  *         in: path
  *         required: true
  *         type: integer
  *         example: 1
- *       - name: material
+ *       - name: labor
  *         in: body
  *         required: true
  *         schema:
  *          type: object
  *          properties:
- *            name:
- *              example: material name
- *            quantity:
+ *            description:
+ *              example: labor name
+ *            hours:
  *              example: 100
- *            unit:
- *              example: units
- *            cost_per_unit:
+ *            cost_per_hour:
  *              example: 10
- *            supplier_cost:
- *              example: 5
- *            profit:
- *              example: 50
  *     responses:
  *       200:
- *         description: A material
+ *         description: A labor
  *         schema:
- *           $ref: '#/definitions/Material'
+ *           $ref: '#/definitions/Labor'
  *       400:
- *         description: material doesn't exist
+ *         description: labor doesn't exist
  *       500:
  *         description: an error occurred
  */
 router.put(
-  '/:job_id/materials/:material_id',
+  '/:job_id/labor/:labor_id',
   authHelpers.ensureAuthenticated,
   routeHelpers.checkUserOwnsJob,
   async (req: any, res) => {
     let job_id = req.params.job_id;
-    let material_id = req.params.material_id;
+    let labor_id = req.params.labor_id;
 
-    let values = routeHelpers.filterBody(req.body, [
-      'name',
-      'quantity',
-      'unit',
-      'cost_per_unit',
-      'supplier_cost',
-      'profit'
-    ]);
+    let values = routeHelpers.filterBody(req.body, ['description', 'hours', 'cost_per_hour']);
 
     try {
-      let material = await knex('services_materials')
-        .where({ id: material_id })
+      let labor = await knex('services_labor')
+        .where({ id: labor_id })
         .first();
 
-      if (material) {
-        let updatedMaterial = await knex('services_materials')
-          .where({ id: material_id })
+      if (labor) {
+        let updatedLabor = await knex('services_labor')
+          .where({ id: labor_id })
           .update(values, '*');
-        res.status(200).json(updatedMaterial[0]);
+        res.status(200).json(updatedLabor[0]);
       } else {
         res.status(400).json({
-          error: `material ${material_id} does not exist or is not owned by this user.`
+          error: `labor ${labor_id} does not exist or is not owned by this user.`
         });
       }
     } catch (err) {
@@ -248,11 +216,11 @@ router.put(
 
 /**
  * @swagger
- *  /jobs/{job_id}/materials/{material_id}:
+ *  /jobs/{job_id}/labor/{labor_id}:
  *  delete:
  *    tags:
- *    - materials
- *    summary: delete a material, the user must own this job
+ *    - labor
+ *    summary: delete a labor, the user must own this job
  *    security:
  *      - Bearer: []
  *    produces:
@@ -264,9 +232,9 @@ router.put(
  *        required: true
  *        type: integer
  *        example: 1
- *      - name: material_id
+ *      - name: labor_id
  *        in: path
- *        description: The id of the material
+ *        description: The id of the labor
  *        required: true
  *        type: integer
  *        example: 1
@@ -274,24 +242,24 @@ router.put(
  *      200:
  *        description: successful operation
  *      400:
- *        description: material does not exist
+ *        description: labor does not exist
  */
 router.delete(
-  '/:job_id/materials/:material_id',
+  '/:job_id/labor/:labor_id',
   authHelpers.ensureAuthenticated,
   routeHelpers.checkUserOwnsJob,
   async (req, res) => {
     let job_id = req.params.job_id;
-    let material_id = req.params.material_id;
+    let labor_id = req.params.labor_id;
 
-    let deletedMaterial = await knex('services_materials')
-      .where({ id: material_id })
+    let deletedLabor = await knex('services_labor')
+      .where({ id: labor_id })
       .delete();
 
-    if (deletedMaterial) {
-      res.status(200).json(`successfully deleted material ${material_id}`);
+    if (deletedLabor) {
+      res.status(200).json(`successfully deleted labor ${labor_id}`);
     } else {
-      res.status(400).json({ error: `material ${material_id} does not exist` });
+      res.status(400).json({ error: `labor ${labor_id} does not exist` });
     }
   }
 );

@@ -95,6 +95,14 @@ router.get(
  *        required: true
  *        type: integer
  *        example: 1
+ *      - name: trade
+ *        in: body
+ *        required: true
+ *        schema:
+ *         type: object
+ *         properties:
+ *           name:
+ *             example: service name
  *    responses:
  *      200:
  *        description: successful operation
@@ -114,8 +122,8 @@ router.post(
 
     if (estimate) {
       try {
-        let trade = await knex('trades').insert({ estimate_id });
-        res.status(200).json(trade);
+        let trade = await knex('trades').insert({ name: req.body.name, estimate_id }, '*');
+        res.status(200).json(trade[0]);
       } catch (err) {
         console.log(err);
         return res.status(500).json(err.message);

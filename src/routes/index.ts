@@ -22,7 +22,7 @@ router.get('/', function(req, res, next) {
 
 router.use(function(req, res, next) {
   // if (req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE') {
-  CacheHelper.invalidateCache();
+  // CacheHelper.invalidateCache();
   // }
   next();
 });
